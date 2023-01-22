@@ -109,41 +109,72 @@ import ttk
 # length_input.grid(row = 2, column = 1, pady=40, padx = 40)
 
 
+
+from tkinter import *
+import tkinter as tk
+from tkinter import ttk
+import awesometkinter as atk
+
+
 def showTemp():  
    sel = "Temp = " + str(tempValue.get())  
    tempLabel.config(text = sel)  
 
-
 def showLight():  
    sel = "Light = " + str(lightValue.get())  
    lightLabel.config(text = sel)  
-     
 
-root = Tk()
-root.geometry("340x360+550+250")
-root.title("Manage Temp and Light system")
+
+root = tk.Tk()
+root.config(background=atk.DEFAULT_COLOR)
+root.geometry("700x400+400+250")
+root.title("Manage Temperature and Light System")
+s = ttk.Style()
+s.theme_use('default')
+
+
+###### f1
+f1 = atk.Frame3d(root)
+f1.pack(side='left', expand=True, fill='both', padx=3, pady=3)
+
+tempProgress = atk.RadialProgressbar3d(f1, fg='purple', size=170)
+tempProgress.pack(padx=20, pady=20)
+tempProgress.set(50)
+tempProgress.stop()
 
 tempValue = DoubleVar()  
-temp = Scale(root, variable = tempValue, from_ = 25, to = 100, orient = HORIZONTAL, length= 300, showvalue = 1)
-temp.pack(anchor=CENTER)  
+temp = Scale(f1, variable = tempValue, from_ = 25, to = 100, orient = HORIZONTAL, length= 300, showvalue = 1)
+temp.pack(padx=15, anchor=CENTER)  
 temp.set(50)
   
-tempBtn = Button(root, text="Temperature", command=showTemp)  
-tempBtn.pack(anchor=CENTER)  
+tempBtn = atk.Button3d(f1, text="Temperature", command=showTemp)
+tempBtn.pack(anchor=CENTER, pady=10)
 
-tempLabel = Label(root)  
-tempLabel.pack()  
+tempLabel = Label(f1)  
+tempLabel.pack(pady=5)  
+
+
+####### f2
+f2 = atk.Frame3d(root)
+f2.pack(side='left', expand=True, fill='both', padx=3, pady=3)
+
+lightProgress = atk.RadialProgressbar3d(f2, fg='yellow', size=170)
+lightProgress.pack(padx=20, pady=20)
+lightProgress.set(50)
+lightProgress.stop()
 
 lightValue = DoubleVar() 
-light = Scale(root, variable = lightValue, from_ = 25, to = 100, orient = HORIZONTAL, length= 300, showvalue = 1)
+light = Scale(f2, variable = lightValue, from_ = 25, to = 100, orient = HORIZONTAL, length= 300, showvalue = 1)
 light.pack(anchor=CENTER)  
 light.set(40)
-  
-lightBtn = Button(root, text="Brightness", command=showLight)  
-lightBtn.pack(anchor=CENTER)  
-  
-lightLabel = Label(root)  
-lightLabel.pack()  
-  
-root.mainloop()  
+
+atk.Button3d(f2, text="Brightness", command=showLight).pack(anchor=CENTER, pady=10)
+
+
+lightLabel = Label(f2)  
+lightLabel.pack(pady=5) 
+root.mainloop()
+
+
+
 
