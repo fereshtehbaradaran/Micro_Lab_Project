@@ -4,7 +4,7 @@
 #include <SD.h>
 #include <Arduino_FreeRTOS.h>
 
-#define MOTOR_PORT 6
+#define COOLER_PORT 6
 #define LED_PORT 5
 
 #define LM35_PORT A2
@@ -43,6 +43,7 @@ void LCD_showInfo(void* params) {
 
 void read_temperature_init() {
   pinMode(LM35_PORT, INPUT);
+  pinMode(COOLER_PORT, OUTPUT);
   new_temperature = 0;
   old_temperature = -1;
 }
@@ -56,9 +57,28 @@ void read_temperature_task(void* params) {
 }
 
 
+void set_motor_speed_task(void* params) {
+  for (;new_temperature <= OFF_TEMPERATURE;){
+    int motor_speed = 30;
+    if (new_temperature >= 30 && new_temperature < 35){
+        motor_speed = 30;
+    }
+    else if (new_temperature < 40 ){
+        motor_speed = 50;
+    }
+    else if (new_temperature < 45){
+        motor_speed = 70;
+    }
+    else if (new_temperature < 50){
+        motor_speed = 100;
+    }
 
-
-
+    analogWrite(COOLER_PORT, motor_speed);
+    vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+  }
+  analogWrite(COOLER_PORT, 0);
+  vTaskDelete(NULL);
+}
 
 
 
