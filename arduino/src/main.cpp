@@ -15,6 +15,7 @@
 
 #define UART_DELAY 20000   //2 seconds
 #define OFF_TEMPERATURE 25
+#define TOTAL_DELAY 300
 
 
 int old_temperature, new_temperature, old_brightness, new_brightness;
@@ -35,7 +36,7 @@ void LCD_showInfo(void* params) {
     sprintf(message, "T:%d L:%d", new_temperature, new_brightness);
     lcd.clear();
     lcd.println(message);
-    // vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+    vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
   vTaskDelete(NULL);
 }
@@ -49,7 +50,7 @@ void read_temperature_init() {
 void read_temperature_task(void* params) {
   for (;;){
     new_temperature = analogRead(LM35_PORT) * 500.0 /1024;
-    // vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+    vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
   vTaskDelete(NULL);
 }
