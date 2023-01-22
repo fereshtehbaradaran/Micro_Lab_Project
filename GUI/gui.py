@@ -1,24 +1,22 @@
 from tkinter.ttk import *
 from tkinter import *
-from tkinter import _flatten, _join, _stringify, _splitdict
 import tkinter
-import ttk
-
-
-from tkinter import *
 import tkinter as tk
 from tkinter import ttk
 import awesometkinter as atk
+import tkinter as tk
+import serial
+import serial.tools.list_ports
+import time
 
 
 def showPower():  
-   sel = "Temp = " + str(CoolerValue.get())  
+   sel = "Power = " + str(CoolerValue.get())  
    CoolerLabel.config(text = sel)  
 
 def showLight():  
    sel = "Light = " + str(lightValue.get())  
    lightLabel.config(text = sel)  
-
 
 root = tk.Tk()
 root.config(background = atk.DEFAULT_COLOR)
@@ -31,6 +29,9 @@ s.theme_use("default")
 ###### f1
 f1 = atk.Frame3d(root)
 f1.pack(side = 'left', expand = True, fill = 'both', padx = 3, pady = 3)
+
+temp = tk.Label(f1, text = "Cooler", fg = "black", bg = 'purple')
+temp.pack(fill = 'x', padx = 5)
 
 currentCoolerValue = 20
 CoolerProgress = atk.RadialProgressbar3d(f1, fg = 'purple', size = 170)
@@ -54,6 +55,9 @@ CoolerLabel.pack(pady = 5)
 f2 = atk.Frame3d(root)
 f2.pack(side = 'left', expand = True, fill = 'both', padx = 3, pady = 3)
 
+temp = tk.Label(f2, text = "Light", bg = 'yellow', fg = "black")
+temp.pack(fill = 'x', padx = 5)
+
 currentLightValue = 40
 lightProgress = atk.RadialProgressbar3d(f2, fg = 'yellow', size = 170)
 lightProgress.pack(padx = 20, pady = 20)
@@ -65,11 +69,12 @@ light = Scale(f2, variable = lightValue, from_ = 0, to = 100, orient = HORIZONTA
 light.pack(anchor = CENTER)  
 light.set(currentLightValue)
 
-atk.Button3d(f2, text = "Set", command = showLight).pack(anchor = CENTER, pady = 10)
-
+lightBtn = atk.Button3d(f2, text = "Set", command = showLight)
+lightBtn.pack(anchor = CENTER, pady = 10)
 
 lightLabel = Label(f2)  
 lightLabel.pack(pady = 5) 
+
 root.mainloop()
 
 
