@@ -136,6 +136,9 @@ void setup() {
   read_brightness_init();
 
 
+  xTaskCreate(cooler_speed_task, "Motor Speed Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(read_temperature_task, "Read Temperture Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(LCD_showInfo, "Show Info LCD Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
 
 }
 
