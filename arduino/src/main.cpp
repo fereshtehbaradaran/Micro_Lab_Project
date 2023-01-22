@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
+#include <SPI.h>
+#include <SD.h>
 
 void setup() {
   // put your setup code here, to run once:
