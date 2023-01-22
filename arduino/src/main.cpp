@@ -21,8 +21,8 @@
 int old_temperature, new_temperature, old_brightness, new_brightness;
 int cooler_speed, cooler_speed_manual;
 int led_brightness, led_brightness_manual; 
-bool cooler_auto = true;
-bool light_auto = true;
+bool cooler_auto;
+bool light_auto;
 char message[100];
 
 
@@ -128,17 +128,44 @@ void LED_brightness_task(void* params){
   vTaskDelete(NULL);
 }
 
+void dip_switch_init(){
+  pinMode(DIP_SW_1, INPUT);
+  pinMode(DIP_SW_2, INPUT);
+  cooler_auto = true;
+  light_auto = true;
+}
+
+void set_auto_manual(void* params){
+    for (;;){
+      int dS1 = digitalRead(DIP_SW_1); // led
+      int dS2 = digitalRead(DIP_SW_2); // cooler
+
+      if (dS1){light_auto = false;}
+      if (dS2){cooler_auto = false;}
+
+      vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+  }
+  vTaskDelete(NULL);
+}
+
+
+
+
 void setup() {
   Serial.begin(9600);
 
   LCD_init();
   read_temperature_init();
   read_brightness_init();
+  dip_switch_init();
 
 
-  xTaskCreate(cooler_speed_task, "Motor Speed Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(cooler_speed_task, "Cooler Speed Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(read_temperature_task, "Read Temperture Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(read_brightness_task, "Read Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(LED_brightness_task, "LED Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LCD_showInfo, "Show Info LCD Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(set_auto_manual, "Set auto or manual Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
 
 }
 
