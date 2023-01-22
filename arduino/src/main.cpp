@@ -17,6 +17,8 @@
 #define OFF_TEMPERATURE 25
 
 
+int old_temperature, new_temperature, old_brightness, new_brightness;
+bool Auto = true;
 char message[100];
 
 
@@ -30,9 +32,23 @@ void LCD_init() {
 
 void LCD_showInfo(void* params) {
   for (;;){
-    // sprintf(message, "T:%d S:%d E:%d", new_temperture, new_motor_speed, current_error_code_eeprom());
+    sprintf(message, "T:%d L:%d", new_temperature, new_brightness);
     lcd.clear();
     lcd.println(message);
+    // vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+  }
+  vTaskDelete(NULL);
+}
+
+void read_temperature_init() {
+  pinMode(LM35_PORT, INPUT);
+  new_temperature = 0;
+  old_temperature = -1;
+}
+
+void read_temperature_task(void* params) {
+  for (;;){
+    new_temperature = analogRead(LM35_PORT) * 500.0 /1024;
     // vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
   vTaskDelete(NULL);
@@ -43,20 +59,15 @@ void LCD_showInfo(void* params) {
 
 
 
+
+
 void setup() {
   Serial.begin(9600);
 
   LCD_init();
+  read_temperature_init();
 
 
-  pinMode(MOTOR_PORT,OUTPUT);
-  pinMode(LED_PORT, OUTPUT);
-
-  pinMode(LM35_PORT, INPUT);
-  pinMode(PHOTOCELL_1, INPUT);
-  pinMode(PHOTOCELL_2, INPUT);
-  pinMode(DIP_SW_1, INPUT);
-  pinMode(DIP_SW_2, INPUT);
 
 }
 
