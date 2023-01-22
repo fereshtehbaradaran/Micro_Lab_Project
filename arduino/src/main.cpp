@@ -20,6 +20,7 @@
 
 int old_temperature, new_temperature, old_brightness, new_brightness;
 int cooler_speed, cooler_speed_manual;
+int led_brightness, led_brightness_manual; 
 bool cooler_auto = true;
 bool light_auto = true;
 char message[100];
@@ -102,7 +103,30 @@ void read_brightness_task(void* params) {
   vTaskDelete(NULL);
 }
 
-
+void LED_brightness_task(void* params){
+  for (;;){
+    if (light_auto){
+      if (new_brightness < 25){
+        led_brightness = 100;
+      }
+      else if (new_brightness < 50 ){
+        led_brightness = 75;
+      }
+      else if (new_brightness < 75){
+        led_brightness = 50;
+      }
+      else if (new_brightness < 100){
+        led_brightness = 25;
+      }
+    } 
+    else{
+      led_brightness = led_brightness_manual;
+    }
+    analogWrite(LED_PORT, led_brightness);
+    vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+  }
+  vTaskDelete(NULL);
+}
 
 void setup() {
   Serial.begin(9600);
