@@ -19,7 +19,9 @@
 
 
 int old_temperature, new_temperature, old_brightness, new_brightness;
-bool Auto = true;
+int cooler_speed, cooler_speed_manual;
+bool cooler_auto = true;
+bool light_auto = true;
 char message[100];
 
 
@@ -56,27 +58,47 @@ void read_temperature_task(void* params) {
   vTaskDelete(NULL);
 }
 
-
-void set_motor_speed_task(void* params) {
+void cooler_speed_task(void* params) {
   for (;new_temperature <= OFF_TEMPERATURE;){
-    int motor_speed = 30;
-    if (new_temperature >= 30 && new_temperature < 35){
-        motor_speed = 30;
-    }
-    else if (new_temperature < 40 ){
-        motor_speed = 50;
-    }
-    else if (new_temperature < 45){
-        motor_speed = 70;
-    }
-    else if (new_temperature < 50){
-        motor_speed = 100;
+    if (cooler_auto){
+      if (new_temperature >= 30 && new_temperature < 35){
+        cooler_speed = 30;
+      }
+      else if (new_temperature < 40 ){
+        cooler_speed = 50;
+      }
+      else if (new_temperature < 45){
+        cooler_speed = 70;
+      }
+      else if (new_temperature < 50){
+        cooler_speed = 100;
+      }
+    } 
+    else{
+      cooler_speed = cooler_speed_manual;
     }
 
-    analogWrite(COOLER_PORT, motor_speed);
+    analogWrite(COOLER_PORT, cooler_speed);
     vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
   analogWrite(COOLER_PORT, 0);
+  vTaskDelete(NULL);
+}
+
+void read_brightness_init(){
+  pinMode(PHOTOCELL_1, INPUT);
+  pinMode(PHOTOCELL_2, INPUT);
+  pinMode(LED_PORT, OUTPUT);
+  new_brightness = 0;
+  old_brightness = -1;
+}
+
+void read_brightness_task(void* params) {
+  for (;;){
+    int value = ((analogRead(PHOTOCELL_1) + analogRead(PHOTOCELL_2)) / 2);
+    new_brightness = map(value, 0, 1023, 0, 100) ;
+    vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+  }
   vTaskDelete(NULL);
 }
 
@@ -87,6 +109,7 @@ void setup() {
 
   LCD_init();
   read_temperature_init();
+  read_brightness_init();
 
 
 
