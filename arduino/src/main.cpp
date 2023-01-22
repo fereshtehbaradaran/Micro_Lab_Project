@@ -36,7 +36,7 @@ void LCD_init() {
 
 void LCD_showInfo(void* params) {
   for (;;){
-    sprintf(message, "T:%d L:%d", new_temperature, new_brightness);
+    sprintf(message, "Temp:%d Light:%d", new_temperature, new_brightness);
     lcd.clear();
     lcd.println(message);
     vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
@@ -140,8 +140,8 @@ void set_auto_manual(void* params){
       int dS1 = digitalRead(DIP_SW_1); // led
       int dS2 = digitalRead(DIP_SW_2); // cooler
 
-      if (dS1){light_auto = false;}
-      if (dS2){cooler_auto = false;}
+      if (dS1){light_auto = false;} else {light_auto = true;}
+      if (dS2){cooler_auto = false;} else {cooler_auto = true;}
 
       vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
@@ -165,7 +165,7 @@ void setup() {
   xTaskCreate(read_brightness_task, "Read Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LED_brightness_task, "LED Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LCD_showInfo, "Show Info LCD Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  xTaskCreate(set_auto_manual, "Set auto or manual Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  // xTaskCreate(set_auto_manual, "Set auto or manual Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
 
 }
 
