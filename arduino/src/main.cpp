@@ -17,7 +17,38 @@
 #define OFF_TEMPERATURE 25
 
 
+char message[100];
+
+
+const int rs = 13, en = 12, d4 = 11, d5 = 10, d6 = 9, d7 = 8;
+LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+
+void LCD_init() {
+  lcd.begin(16, 2);
+}
+
+void LCD_showInfo(void* params) {
+  for (;;){
+    // sprintf(message, "T:%d S:%d E:%d", new_temperture, new_motor_speed, current_error_code_eeprom());
+    lcd.clear();
+    lcd.println(message);
+    // vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+  }
+  vTaskDelete(NULL);
+}
+
+
+
+
+
+
 void setup() {
+  Serial.begin(9600);
+
+  LCD_init();
+
+
   pinMode(MOTOR_PORT,OUTPUT);
   pinMode(LED_PORT, OUTPUT);
 
@@ -26,9 +57,7 @@ void setup() {
   pinMode(PHOTOCELL_2, INPUT);
   pinMode(DIP_SW_1, INPUT);
   pinMode(DIP_SW_2, INPUT);
-  
+
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
-}
+void loop() {}
