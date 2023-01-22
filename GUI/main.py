@@ -143,15 +143,15 @@ tempBtn.pack(anchor=CENTER)
 tempLabel = Label(root)  
 tempLabel.pack()  
 
-# lightValue = DoubleVar() 
-# light = Scale(root, variable = lightValue, from_ = 25, to = 100, orient = HORIZONTAL, length= 300, showvalue = 1)
-# light.pack(anchor=CENTER)  
-# light.set(40)
+lightValue = DoubleVar() 
+light = Scale(root, variable = lightValue, from_ = 25, to = 100, orient = HORIZONTAL, length= 300, showvalue = 1)
+light.pack(anchor=CENTER)  
+light.set(40)
   
-# lightBtn = Button(root, text="Brightness", command=showLight)  
-# lightBtn.pack(anchor=CENTER)  
+lightBtn = Button(root, text="Brightness", command=showLight)  
+lightBtn.pack(anchor=CENTER)  
   
-# lightLabel = Label(root)  
-# lightLabel.pack()  
+lightLabel = Label(root)  
+lightLabel.pack()  
   
 root.mainloop()  
