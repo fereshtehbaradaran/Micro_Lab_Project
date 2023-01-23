@@ -1,38 +1,36 @@
 from tkinter.ttk import *
+from tkinter import ttk
 from tkinter import *
 import tkinter
 import tkinter as tk
-from tkinter import ttk
 import awesometkinter as atk
-import tkinter as tk
-import serial
-import serial.tools.list_ports
-import time
 from glob import T , L, Tnew, Lnew
 
 
 def showPower():  
    sel = "Power = " + str(CoolerValue.get())  
    CoolerLabel.config(text = sel)
+   CoolerProgress.set(CoolerValue.get())
    return CoolerValue.get()
+
 
 def showLight():  
    sel = "Light = " + str(lightValue.get())  
    lightLabel.config(text = sel)
+   lightProgress.set(lightValue.get())
    return lightValue.get()
 
-
-
-
+   
+# Root 
 root = tk.Tk()
 root.config(background = atk.DEFAULT_COLOR)
-root.geometry("700x400+400+250")
+root.geometry("700x440+400+250")
 root.title("Manage Temperature and Light System")
 s = ttk.Style()
 s.theme_use("default")
 
 
-###### f1
+# Frame f1 
 f1 = atk.Frame3d(root)
 f1.pack(side = 'left', expand = True, fill = 'both', padx = 3, pady = 3)
 
@@ -47,7 +45,7 @@ CoolerProgress.stop()
 
 CoolerValue = DoubleVar()  
 CoolerScale = Scale(f1, variable = CoolerValue, from_ = 0, to = 100, orient = HORIZONTAL, length = 300, showvalue = 1)
-CoolerScale.pack(anchor = CENTER, padx = 15)  
+CoolerScale.pack(anchor = CENTER, padx = 10, pady = 10)  
 CoolerScale.set(currentCoolerValue)
   
 CoolerBtn = atk.Button3d(f1, text = "Set", command = showPower)
@@ -57,11 +55,11 @@ CoolerLabel = Label(f1)
 CoolerLabel.pack(pady = 5)  
 
 
-####### f2
+# Frame f2
 f2 = atk.Frame3d(root)
 f2.pack(side = 'left', expand = True, fill = 'both', padx = 3, pady = 3)
 
-temp = tk.Label(f2, text = "Light", bg = '#f2e05b', fg = "black")
+temp = tk.Label(f2, text = "Light", bg = '#f2e05b', fg = "black", font=("Helvetica", 14))
 temp.pack(fill = 'x', padx = 5)
 
 currentLightValue = L
@@ -70,9 +68,10 @@ lightProgress.pack(padx = 20, pady = 20)
 lightProgress.set(currentLightValue)
 lightProgress.stop()
 
-lightValue = DoubleVar() 
+lightValue = DoubleVar()
+print(lightValue)
 light = Scale(f2, variable = lightValue, from_ = 0, to = 100, orient = HORIZONTAL, length= 300, showvalue = 1)
-light.pack(anchor = CENTER, pady = 10)  
+light.pack(anchor = CENTER, padx = 10, pady = 10)  
 light.set(currentLightValue)
 
 lightBtn = atk.Button3d(f2, text = "Set", command = showLight)
@@ -81,4 +80,5 @@ lightBtn.pack(anchor = CENTER, pady = 10)
 lightLabel = Label(f2)  
 lightLabel.pack(pady = 5) 
 
+root.update() 
 root.mainloop()
