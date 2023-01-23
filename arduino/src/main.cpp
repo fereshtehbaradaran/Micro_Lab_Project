@@ -4,7 +4,7 @@
 #include <SD.h>
 #include <Arduino_FreeRTOS.h>
 
-#define COOLER_PORT 10
+#define COOLER_PORT 6
 #define LED_PORT 5
 
 #define LM35_PORT A2
