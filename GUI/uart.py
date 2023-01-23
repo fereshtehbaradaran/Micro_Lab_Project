@@ -1,7 +1,7 @@
 import serial
 import serial.tools.list_ports
 import time
-from gui import CoolerValue, lightValue
+from gui import CoolerScale, lightScale
 from glob import T , L, Tnew, Lnew
 
 
@@ -34,22 +34,24 @@ def checkSerialPort():
 
 def sendMessageTemp():
     serialInst.write("T")
-    coolerPower = CoolerValue.get()
+    coolerPower = CoolerScale.get()
     serialInst.write(coolerPower.encode())
 
 
 def sendMessageLight():
     serialInst.write("L")
-    lightPower = lightValue.get()
+    lightPower = lightScale.get()
     serialInst.write(lightPower.encode())
 
 
 def checkStatus():
    if T != Tnew:
+      T = Tnew
       sendMessageTemp()
 
    if L != Lnew:
-      sendMessageLight()
+    L = Lnew
+    sendMessageLight()
 
 
 foundPorts = serial.tools.list_ports.comports()        

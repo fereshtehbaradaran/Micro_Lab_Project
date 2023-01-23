@@ -8,19 +8,19 @@ from glob import T , L, Tnew, Lnew
 
 
 def showPower():  
-   sel = "Power = " + str(CoolerValue.get())  
+   sel = "Power = " + str(CoolerScale.get())  
    CoolerLabel.config(text = sel)
-   CoolerProgress.set(CoolerValue.get())
-   return CoolerValue.get()
+   CoolerProgress.set(CoolerScale.get())
+   Tnew = CoolerScale.get()
 
 
 def showLight():  
-   sel = "Light = " + str(lightValue.get())  
+   sel = "Light = " + str(lightScale.get())  
    lightLabel.config(text = sel)
-   lightProgress.set(lightValue.get())
-   return lightValue.get()
+   lightProgress.set(lightScale.get())
+   Lnew = lightScale.get()
 
-   
+
 # Root 
 root = tk.Tk()
 root.config(background = atk.DEFAULT_COLOR)
@@ -69,10 +69,9 @@ lightProgress.set(currentLightValue)
 lightProgress.stop()
 
 lightValue = DoubleVar()
-print(lightValue)
-light = Scale(f2, variable = lightValue, from_ = 0, to = 100, orient = HORIZONTAL, length= 300, showvalue = 1)
-light.pack(anchor = CENTER, padx = 10, pady = 10)  
-light.set(currentLightValue)
+lightScale = Scale(f2, variable = lightValue, from_ = 0, to = 100, orient = HORIZONTAL, length= 300, showvalue = 1)
+lightScale.pack(anchor = CENTER, padx = 10, pady = 10)  
+lightScale.set(currentLightValue)
 
 lightBtn = atk.Button3d(f2, text = "Set", command = showLight)
 lightBtn.pack(anchor = CENTER, pady = 10)
