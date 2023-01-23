@@ -18,6 +18,12 @@
 #define OFF_TEMPERATURE 25
 #define TOTAL_DELAY 300
 
+SemaphoreHandle_t auto_temp_mutex;
+SemaphoreHandle_t auto_light_mutex;
+
+SemaphoreHandle_t temp_value_mutex;
+SemaphoreHandle_t light_value_mutex;
+
 
 int old_temperature, new_temperature, old_brightness, new_brightness;
 int cooler_speed, cooler_speed_manual;
@@ -63,29 +69,34 @@ void read_temperature_task(void* params) {
 
 void cooler_speed_task(void* params) {
   for (;;){
-    if (cooler_auto){
-      if (new_temperature <= OFF_TEMPERATURE){
-        cooler_speed = 0;
-      }
-      if (new_temperature < 35){
-        cooler_speed = 30;
-      }
-      else if (new_temperature < 40 ){
-        cooler_speed = 50;
-      }
-      else if (new_temperature < 45){
-        cooler_speed = 70;
-      }
-      else if (new_temperature < 50){
-        cooler_speed = 100;
-      }
+    xSemaphoreTake(auto_temp_mutex, portMAX_DELAY);
+      if (cooler_auto){
+        if (new_temperature <= OFF_TEMPERATURE){
+          cooler_speed = 0;
+        }
+        if (new_temperature < 35){
+          cooler_speed = 30;
+        }
+        else if (new_temperature < 40 ){
+          cooler_speed = 50;
+        }
+        else if (new_temperature < 45){
+          cooler_speed = 70;
+        }
+        else if (new_temperature < 50){
+          cooler_speed = 100;
+        }
+        else{
+          cooler_speed = 100;
+        }
+      } 
       else{
-        cooler_speed = 100;
+        xSemaphoreTake(temp_value_mutex, portMAX_DELAY);
+          cooler_speed = cooler_speed_manual;
+        xSemaphoreGive(temp_value_mutex);
       }
-    } 
-    else{
-      cooler_speed = cooler_speed_manual;
-    }
+    xSemaphoreGive(auto_temp_mutex);
+
     cooler_speed = map(cooler_speed, 0, 100, 0, 255);
     analogWrite(COOLER_PORT, cooler_speed);
     vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
@@ -112,23 +123,28 @@ void read_brightness_task(void* params) {
 
 void LED_brightness_task(void* params){
   for (;;){
-    if (light_auto){
-      if (new_brightness < 25){
-        led_brightness = 100;
+    xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
+      if (light_auto){
+        if (new_brightness < 25){
+          led_brightness = 100;
+        }
+        else if (new_brightness < 50 ){
+          led_brightness = 75;
+        }
+        else if (new_brightness < 75){
+          led_brightness = 50;
+        }
+        else if (new_brightness < 100){
+          led_brightness = 25;
+        }
+      } 
+      else{
+        xSemaphoreTake(light_value_mutex, portMAX_DELAY);
+          led_brightness = led_brightness_manual;
+        xSemaphoreGive(light_value_mutex);
       }
-      else if (new_brightness < 50 ){
-        led_brightness = 75;
-      }
-      else if (new_brightness < 75){
-        led_brightness = 50;
-      }
-      else if (new_brightness < 100){
-        led_brightness = 25;
-      }
-    } 
-    else{
-      led_brightness = led_brightness_manual;
-    }
+    xSemaphoreGive(auto_light_mutex);
+
     led_brightness = map(led_brightness,0,100,0,255);
     analogWrite(LED_PORT, led_brightness);
     vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
@@ -148,8 +164,26 @@ void set_auto_manual(void* params){
       int dS1 = digitalRead(DIP_SW_1); // led
       int dS2 = digitalRead(DIP_SW_2); // cooler
 
-      if (dS1){light_auto = false;} else {light_auto = true;}
-      if (dS2){cooler_auto = false;} else {cooler_auto = true;}
+      if (dS1){
+        xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
+          light_auto = false;
+        xSemaphoreGive(auto_light_mutex);
+      } 
+      else {
+        xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
+          light_auto = true;
+        xSemaphoreGive(auto_light_mutex)
+      }
+      if (dS2){
+        xSemaphoreTake(auto_temp_mutex, portMAX_DELAY);
+          cooler_auto = false;
+        xSemaphoreGive(auto_temp_mutex);
+      } 
+      else {
+        xSemaphoreTake(auto_temp_mutex, portMAX_DELAY);
+          cooler_auto = true;
+        xSemaphoreGive(auto_temp_mutex);
+      }
 
       vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
