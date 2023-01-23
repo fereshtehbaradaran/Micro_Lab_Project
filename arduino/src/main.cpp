@@ -4,7 +4,7 @@
 #include <SD.h>
 #include <Arduino_FreeRTOS.h>
 
-#define COOLER_PORT 6
+#define COOLER_PORT 10
 #define LED_PORT 5
 
 #define LM35_PORT A2
@@ -27,7 +27,7 @@ char message[100];
 char data[100];
 
 
-const int rs = 13, en = 12, d4 = 11, d5 = 10, d6 = 9, d7 = 8;
+const int rs = 13, en = 12, d4 = 11, d5 = 7, d6 = 9, d7 = 8;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 
@@ -61,9 +61,12 @@ void read_temperature_task(void* params) {
 }
 
 void cooler_speed_task(void* params) {
-  for (;new_temperature <= OFF_TEMPERATURE;){
+  for (;;){
     if (cooler_auto){
-      if (new_temperature >= 30 && new_temperature < 35){
+      if (new_temperature <= OFF_TEMPERATURE){
+        cooler_speed = 0;
+      }
+      if (new_temperature < 35){
         cooler_speed = 30;
       }
       else if (new_temperature < 40 ){
@@ -75,15 +78,17 @@ void cooler_speed_task(void* params) {
       else if (new_temperature < 50){
         cooler_speed = 100;
       }
+      else{
+        cooler_speed = 100;
+      }
     } 
     else{
       cooler_speed = cooler_speed_manual;
     }
-
+    cooler_speed = map(cooler_speed, 0, 100, 0, 255);
     analogWrite(COOLER_PORT, cooler_speed);
     vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
-  analogWrite(COOLER_PORT, 0);
   vTaskDelete(NULL);
 }
 
@@ -123,6 +128,7 @@ void LED_brightness_task(void* params){
     else{
       led_brightness = led_brightness_manual;
     }
+    led_brightness = map(led_brightness,0,100,0,255);
     analogWrite(LED_PORT, led_brightness);
     vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
@@ -130,8 +136,8 @@ void LED_brightness_task(void* params){
 }
 
 void dip_switch_init(){
-  pinMode(DIP_SW_1, INPUT);
-  pinMode(DIP_SW_2, INPUT);
+  pinMode(DIP_SW_1, INPUT_PULLUP);
+  pinMode(DIP_SW_2, INPUT_PULLUP);
   cooler_auto = true;
   light_auto = true;
 }
@@ -153,7 +159,7 @@ void send_status_to_GUI(void* params){
   for(;;){
     sprintf(data, "%d %d", new_temperature, new_brightness);
     Serial.print(data);
-    vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+    vTaskDelay(UART_DELAY / portTICK_PERIOD_MS);
   }
   vTaskDelete(NULL);
 }
@@ -196,8 +202,8 @@ void setup() {
   xTaskCreate(LED_brightness_task, "LED Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LCD_showInfo, "Show Info LCD Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   // xTaskCreate(set_auto_manual, "Set auto or manual Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  xTaskCreate(send_status_to_GUI, "Send temperature and brightness to GUI", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  xTaskCreate(recieve_manual_value, "Recieve temp and light from user", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  // xTaskCreate(send_status_to_GUI, "Send temperature and brightness to GUI", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  // xTaskCreate(recieve_manual_value, "Recieve temp and light from user", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
 
 }
 
