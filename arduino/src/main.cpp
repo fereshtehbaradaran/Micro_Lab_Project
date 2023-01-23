@@ -3,6 +3,7 @@
 #include <SPI.h>
 #include <SD.h>
 #include <Arduino_FreeRTOS.h>
+#include <semphr.h>
 
 #define COOLER_PORT 6
 #define LED_PORT 5
@@ -136,8 +137,8 @@ void LED_brightness_task(void* params){
 }
 
 void dip_switch_init(){
-  pinMode(DIP_SW_1, INPUT_PULLUP);
-  pinMode(DIP_SW_2, INPUT_PULLUP);
+  pinMode(DIP_SW_1, INPUT);
+  pinMode(DIP_SW_2, INPUT);
   cooler_auto = true;
   light_auto = true;
 }
@@ -201,7 +202,7 @@ void setup() {
   xTaskCreate(read_brightness_task, "Read Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LED_brightness_task, "LED Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LCD_showInfo, "Show Info LCD Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  // xTaskCreate(set_auto_manual, "Set auto or manual Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  // xTaskCreate(set_auto_manual, "Set auto or manual Task", 128, NULL, tskIDLE_PRIORITY + 4, NULL);
   // xTaskCreate(send_status_to_GUI, "Send temperature and brightness to GUI", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   // xTaskCreate(recieve_manual_value, "Recieve temp and light from user", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
 
