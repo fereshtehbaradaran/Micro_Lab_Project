@@ -3,39 +3,12 @@ import serial.tools.list_ports
 import time
 import serial
 import tkinter as tk
-
-
-# ports = serial.tools.list_ports.comports()
-# serialInst = serial.Serial()
-
-# portsList = []
-
-# for onePort in ports:
-#     portsList.append(str(onePort))
-#     print(str(onePort))
-
-# val = input("Select Port: COM")
-# portVar = ''
-# for x in range(len(portsList)):
-#     if portsList[x].startswith("COM" + str(val)):
-#         portVar = "COM" + str(val)
-#         print(portVar)
-
-# serialInst.baudrate = 9600
-# serialInst.port = portVar
-# serialInst.open()
-
-# while True:
-#  if serialInst.in_waiting:
-#   packet = serialInst.readline()
-#   print(packet.decode('utf').rstrip('\n'))
-
-
-
-import serial.tools.list_ports
+import gui
+from gui import showPower, showLight
 import functools
 from tkinter import *
-import serial
+from glob import T , L, Tnew, Lnew
+
 
 # ports = serial.tools.list_ports.comports()
 # serialObj = serial.Serial()
@@ -63,19 +36,6 @@ import serial
 
 # dataCanvas.config(yscrollcommand = vsb.set)
 
-# dataFrame = Frame(dataCanvas, bg="white")
-# dataCanvas.create_window((10,0),window=dataFrame,anchor='nw')
-
-# def checkSerialPort():
-#     if serialObj.isOpen() and serialObj.in_waiting:
-#         recentPacket = serialObj.readline()
-#         recentPacketString = recentPacket.decode('utf').rstrip('\n')
-#         Label(dataFrame, text=recentPacketString)
-
-# while True:
-#     root.update()
-#     checkSerialPort()
-#     dataCanvas.config(scrollregion=dataCanvas.bbox("all"))
 
 
 def findArduino(ports):
@@ -116,16 +76,27 @@ else:
     print('Connection Issue!')
 
 
-def send_message():
-    message = entry.get()
-    ser.write(message.encode())
-    response = ser.readline()
-    label.config(text=response)
+def sendMessageTemp():
+    serialInst.write("T")
+    coolerPower = showPower()
+    serialInst.write(coolerPower.encode())
 
 
-# serialInst.write(b'Hello Arduino')        
-# response = serialInst.readline()          
-# print(response)                   
+def sendMessageLight():
+    serialInst.write("L")
+    lightPower = showLight()
+    serialInst.write(lightPower.encode())
+
+
+def checkStatus():
+   if T != Tnew:
+      sendMessageTemp()
+
+   if L != Lnew:
+      sendMessageLight()
+
+
+# root.update()            
 # serialInst.close()   
 
 
@@ -134,23 +105,3 @@ while True:
 
 
                
-
-
-
-
-
-
-
-root = tk.Tk()
-root.title("Arduino UART")
-
-entry = tk.Entry(root)
-entry.pack()
-
-send_button = tk.Button(root, text="Send", command=send_message)
-send_button.pack()
-
-label = tk.Label(root, text="No response yet.")
-label.pack()
-
-root.mainloop()
