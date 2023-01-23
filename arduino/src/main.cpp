@@ -24,6 +24,7 @@ int led_brightness, led_brightness_manual;
 bool cooler_auto;
 bool light_auto;
 char message[100];
+char data[100];
 
 
 const int rs = 13, en = 12, d4 = 11, d5 = 10, d6 = 9, d7 = 8;
@@ -148,7 +149,36 @@ void set_auto_manual(void* params){
   vTaskDelete(NULL);
 }
 
+void send_status_to_GUI(void* params){
+  for(;;){
+    sprintf(data, "%d %d", new_temperature, new_brightness);
+    Serial.print(data);
+    vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+  }
+  vTaskDelete(NULL);
+}
 
+void recieve_manual_value(void* params){
+  for(;;){
+    String status;
+    if (Serial.available() > 0){
+      status = Serial.readString();
+      if (status == "T") {
+        if (Serial.available() > 0) {
+          cooler_speed_manual = Serial.parseInt();
+        }
+      }
+      else if (status == "L") {
+        if (Serial.available() > 0) {
+          led_brightness_manual = Serial.parseInt();
+        }
+      }
+
+    }
+    vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
+  }
+  vTaskDelete(NULL);
+}
 
 
 void setup() {
@@ -166,6 +196,8 @@ void setup() {
   xTaskCreate(LED_brightness_task, "LED Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LCD_showInfo, "Show Info LCD Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   // xTaskCreate(set_auto_manual, "Set auto or manual Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(send_status_to_GUI, "Send temperature and brightness to GUI", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(recieve_manual_value, "Recieve temp and light from user", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
 
 }
 
