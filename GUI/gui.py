@@ -8,7 +8,7 @@ import tkinter as tk
 import serial
 import serial.tools.list_ports
 import time
-import uart
+from glob import T , L, Tnew, Lnew
 
 
 def showPower():  
@@ -20,6 +20,8 @@ def showLight():
    sel = "Light = " + str(lightValue.get())  
    lightLabel.config(text = sel)
    return lightValue.get()
+
+
 
 
 root = tk.Tk()
@@ -37,7 +39,7 @@ f1.pack(side = 'left', expand = True, fill = 'both', padx = 3, pady = 3)
 temp = tk.Label(f1, text = "Cooler", fg = "black", bg = '#0dbee1', font=("Helvetica", 14))
 temp.pack(fill = 'x', padx = 5)
 
-currentCoolerValue = 20
+currentCoolerValue = T
 CoolerProgress = atk.RadialProgressbar3d(f1, fg = '#0dbee1', size = 170)
 CoolerProgress.pack(padx = 20, pady = 20)
 CoolerProgress.set(currentCoolerValue)
@@ -62,7 +64,7 @@ f2.pack(side = 'left', expand = True, fill = 'both', padx = 3, pady = 3)
 temp = tk.Label(f2, text = "Light", bg = '#f2e05b', fg = "black")
 temp.pack(fill = 'x', padx = 5)
 
-currentLightValue = 40
+currentLightValue = L
 lightProgress = atk.RadialProgressbar3d(f2, fg = '#f2e05b', size = 170)
 lightProgress.pack(padx = 20, pady = 20)
 lightProgress.set(currentLightValue)
