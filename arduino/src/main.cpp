@@ -131,7 +131,9 @@ void cooler_speed_task(void* params) {
       }
     } 
     else{
-      cooler_speed = cooler_speed_manual;
+      xSemaphoreTake(temp_value_mutex, portMAX_DELAY);
+        cooler_speed = cooler_speed_manual;
+      xSemaphoreGive(temp_value_mutex, portMAX_DELAY); 
     }
 
     cooler_speed = map(cooler_speed, 0, 100, 0, 255);
@@ -165,7 +167,6 @@ void read_brightness_task(void* params) {
 
 void LED_brightness_task(void* params){
   for (;;){
-    // xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
       if (light_auto){
         if (new_brightness < 25){
           led_brightness = 100;
@@ -181,11 +182,10 @@ void LED_brightness_task(void* params){
         }
       } 
       else{
-        // xSemaphoreTake(light_value_mutex, portMAX_DELAY);
+        xSemaphoreTake(light_value_mutex, portMAX_DELAY);
           led_brightness = led_brightness_manual;
-        // xSemaphoreGive(light_value_mutex);
+        xSemaphoreGive(light_value_mutex, portMAX_DELAY);
       }
-    // xSemaphoreGive(auto_light_mutex);
 
     led_brightness = map(led_brightness,0,100,0,255);
     analogWrite(LED_PORT, led_brightness);
@@ -220,14 +220,17 @@ void recieve_manual_value(void* params){
         if (status == "T") {
           if (Serial.available() > 0) {
             int value = Serial.parseInt();
-            xSemaphoreTake(temp_value_mutex);
+            xSemaphoreTake(temp_value_mutex, portMAX_DELAY);
               cooler_speed_manual = value;
-            xSemaphoreGive(temp_value_mutex); 
+            xSemaphoreGive(temp_value_mutex, portMAX_DELAY); 
           }
         }
         else if (status == "L") {
           if (Serial.available() > 0) {
-            led_brightness_manual = Serial.parseInt();
+            int value = Serial.parseInt();
+            xSemaphoreTake(light_value_mutex, portMAX_DELAY);
+            led_brightness_manual = value;
+            xSemaphoreGive(light_value_mutex, portMAX_DELAY);
           }
         }
       }
