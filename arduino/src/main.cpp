@@ -133,7 +133,7 @@ void cooler_speed_task(void* params) {
     else{
       xSemaphoreTake(temp_value_mutex, portMAX_DELAY);
         cooler_speed = cooler_speed_manual;
-      xSemaphoreGive(temp_value_mutex, portMAX_DELAY); 
+      xSemaphoreGive(temp_value_mutex); 
     }
 
     cooler_speed = map(cooler_speed, 0, 100, 0, 255);
@@ -184,7 +184,7 @@ void LED_brightness_task(void* params){
       else{
         xSemaphoreTake(light_value_mutex, portMAX_DELAY);
           led_brightness = led_brightness_manual;
-        xSemaphoreGive(light_value_mutex, portMAX_DELAY);
+        xSemaphoreGive(light_value_mutex);
       }
 
     led_brightness = map(led_brightness,0,100,0,255);
@@ -222,7 +222,7 @@ void recieve_manual_value(void* params){
             int value = Serial.parseInt();
             xSemaphoreTake(temp_value_mutex, portMAX_DELAY);
               cooler_speed_manual = value;
-            xSemaphoreGive(temp_value_mutex, portMAX_DELAY); 
+            xSemaphoreGive(temp_value_mutex); 
           }
         }
         else if (status == "L") {
@@ -230,7 +230,7 @@ void recieve_manual_value(void* params){
             int value = Serial.parseInt();
             xSemaphoreTake(light_value_mutex, portMAX_DELAY);
             led_brightness_manual = value;
-            xSemaphoreGive(light_value_mutex, portMAX_DELAY);
+            xSemaphoreGive(light_value_mutex);
           }
         }
       }
