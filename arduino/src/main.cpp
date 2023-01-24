@@ -253,12 +253,14 @@ void setup() {
   sdCard_init();
 
 
-  xTaskCreate(cooler_speed_task, "Cooler Speed Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  xTaskCreate(read_temperature_task, "Read Temperture Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  xTaskCreate(read_brightness_task, "Read Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  xTaskCreate(LED_brightness_task, "LED Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  xTaskCreate(LCD_showInfo, "Show Info LCD Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  xTaskCreate(recieve_manual_value, "Recieve temp and light from user", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(cooler_speed_task, "Cooler Speed Task", 80, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(read_temperature_task, "Read Temperture Task", 80, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(read_brightness_task, "Read Brightness Task", 80, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(LED_brightness_task, "LED Brightness Task", 80, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(LCD_showInfo, "Show Info LCD Task", 80, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(recieve_manual_value, "Recieve temp and light from user", 80, NULL, tskIDLE_PRIORITY + 3, NULL);
+
+  vTaskStartScheduler();
 
 }
 
