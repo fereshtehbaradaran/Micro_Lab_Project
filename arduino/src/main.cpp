@@ -13,6 +13,7 @@
 #define PHOTOCELL_2 A1
 #define DIP_SW_1 2
 #define DIP_SW_2 3
+#define SD_CS_PORT 4
 
 #define UART_DELAY 20000   //2 seconds
 #define OFF_TEMPERATURE 25
@@ -44,7 +45,7 @@ void semaphore_init(){
 
 void sdCard_init(){
   Serial.print("SD Card init...");
-  if (!SD.begin(4)) {
+  if (!SD.begin(SD_CS_PORT)) {
     Serial.println("init failed...");
     while (1);
   }
@@ -257,7 +258,7 @@ void setup() {
   xTaskCreate(read_brightness_task, "Read Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LED_brightness_task, "LED Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LCD_showInfo, "Show Info LCD Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  // xTaskCreate(recieve_manual_value, "Recieve temp and light from user", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
+  xTaskCreate(recieve_manual_value, "Recieve temp and light from user", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
 
 }
 
