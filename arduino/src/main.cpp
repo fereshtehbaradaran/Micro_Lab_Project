@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #include <SPI.h>
-#include <SD.h>
+#include <SD.h>   //MOSI: 11  MISO: 12  CLK: 13  CS: 4
 #include <Arduino_FreeRTOS.h>
 #include <semphr.h>
 
@@ -24,6 +24,8 @@
 // SemaphoreHandle_t temp_value_mutex;
 // SemaphoreHandle_t light_value_mutex;
 
+SemaphoreHandle_t sdCard_mutex;
+
 
 int old_temperature, new_temperature, old_brightness, new_brightness;
 int cooler_speed, cooler_speed_manual;
@@ -31,23 +33,55 @@ int led_brightness, led_brightness_manual;
 bool cooler_auto;
 bool light_auto;
 char message[100];
-char data[100];
+File sdCard;
 
 
-const int rs = 13, en = 12, d4 = 11, d5 = 7, d6 = 9, d7 = 8;
+const int rs = A4, en = A3, d4 = 10, d5 = 9, d6 = 8, d7 = 7;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 
-// void semaphore_init(){
-//   auto_temp_mutex = xSemaphoreCreateMutex();
-//   auto_light_mutex = xSemaphoreCreateMutex();
-//   temp_value_mutex = xSemaphoreCreateMutex();
-//   light_value_mutex = xSemaphoreCreateMutex();
-// }
+void semaphore_init(){
+  sdCard_mutex = xSemaphoreCreateMutex();
+  // auto_temp_mutex = xSemaphoreCreateMutex();
+  // auto_light_mutex = xSemaphoreCreateMutex();
+  // temp_value_mutex = xSemaphoreCreateMutex();
+  // light_value_mutex = xSemaphoreCreateMutex();
+}
 
+void sdCard_init(){
+  Serial.print("SD Card init...");
+  if (!SD.begin(4)) {
+    Serial.println("init failed...");
+    while (1);
+  }
+
+  Serial.println("[OK]");
+
+  if (!SD.exists("data.txt")) {
+    Serial.println("Creating \"data.txt\"");
+  }
+}
+
+void write_on_sdCard(char lable, int value){
+  char data[100];
+  sprintf(data,"%c: %d",lable, value);
+
+  xSemaphoreTake(sdCard_mutex,portMAX_DELAY);
+    sdCard = SD.open("data.txt",FILE_WRITE);
+    if (sdCard){
+      sdCard.println(data);
+      sdCard.close();
+    }
+    else {
+      Serial.println("Cannot Open File");
+    }
+  xSemaphoreGive(sdCard_mutex);
+}
 
 void LCD_init() {
+  Serial.print("LCD init ...");
   lcd.begin(16, 2);
+  Serial.println("[OK]");
 }
 
 void LCD_showInfo(void* params) {
@@ -61,15 +95,19 @@ void LCD_showInfo(void* params) {
 }
 
 void read_temperature_init() {
+  Serial.print("LM35 init...");
   pinMode(LM35_PORT, INPUT);
   pinMode(COOLER_PORT, OUTPUT);
   new_temperature = 0;
   old_temperature = -1;
+  Serial.println("[OK]");
 }
 
 void read_temperature_task(void* params) {
   for (;;){
+    Serial.println("T");
     new_temperature = analogRead(LM35_PORT) * 500.0 /1024;
+    Serial.println(new_temperature);
     vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
   vTaskDelete(NULL);
@@ -113,17 +151,21 @@ void cooler_speed_task(void* params) {
 }
 
 void read_brightness_init(){
+  Serial.print("Photocell init...");
   pinMode(PHOTOCELL_1, INPUT);
   pinMode(PHOTOCELL_2, INPUT);
   pinMode(LED_PORT, OUTPUT);
   new_brightness = 0;
   old_brightness = -1;
+  Serial.println("[OK]");
 }
 
 void read_brightness_task(void* params) {
   for (;;){
+    Serial.println("L");
     int value = ((analogRead(PHOTOCELL_1) + analogRead(PHOTOCELL_2)) / 2);
     new_brightness = map(value, 0, 1023, 0, 100) ;
+    Serial.println(new_brightness);
     vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
   }
   vTaskDelete(NULL);
@@ -198,14 +240,14 @@ void set_auto_manual(void* params){
   vTaskDelete(NULL);
 }
 
-void send_status_to_GUI(void* params){
-  for(;;){
-    sprintf(data, "%d %d", new_temperature, new_brightness);
-    Serial.print(data);
-    vTaskDelay(UART_DELAY / portTICK_PERIOD_MS);
-  }
-  vTaskDelete(NULL);
-}
+// void send_status_to_GUI(void* params){
+//   for(;;){
+//     sprintf(data, "%d %d", new_temperature, new_brightness);
+//     Serial.print(data);
+//     vTaskDelay(UART_DELAY / portTICK_PERIOD_MS);
+//   }
+//   vTaskDelete(NULL);
+// }
 
 void recieve_manual_value(void* params){
   for(;;){
@@ -238,6 +280,7 @@ void setup() {
   read_temperature_init();
   read_brightness_init();
   dip_switch_init();
+  sdCard_init();
 
 
   xTaskCreate(cooler_speed_task, "Cooler Speed Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
