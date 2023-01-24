@@ -6,7 +6,7 @@ from glob import T , L, Tnew, Lnew
 
 
 def initComPort(port, baudrate = 9600, timeout = 1 ):
-    # port = 'COM' + str(index)
+    # port = 'COM' + str(index)   //ttyUSB0
     serialInst.port = port
     serialInst.baudrate = 9600
     serialInst.open()
@@ -24,6 +24,8 @@ def findArduino(ports):
 
 
 def checkSerialPort():
+    global T, L
+
     if serialInst.isOpen() and serialInst.in_waiting:
         recentPacket = serialInst.readline()
         recentPacketString = recentPacket.decode('utf').rstrip('\n')
@@ -45,6 +47,8 @@ def sendMessageLight():
 
 
 def checkStatus():
+   global T, L, Tnew, Lnew
+
    if T != Tnew:
       T = Tnew
       sendMessageTemp()
@@ -71,6 +75,3 @@ else:
 
 while True:
     checkSerialPort()
-
-
-               
