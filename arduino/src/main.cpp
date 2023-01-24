@@ -18,11 +18,11 @@
 #define OFF_TEMPERATURE 25
 #define TOTAL_DELAY 300
 
-SemaphoreHandle_t auto_temp_mutex;
-SemaphoreHandle_t auto_light_mutex;
+// SemaphoreHandle_t auto_temp_mutex;
+// SemaphoreHandle_t auto_light_mutex;
 
-SemaphoreHandle_t temp_value_mutex;
-SemaphoreHandle_t light_value_mutex;
+// SemaphoreHandle_t temp_value_mutex;
+// SemaphoreHandle_t light_value_mutex;
 
 
 int old_temperature, new_temperature, old_brightness, new_brightness;
@@ -36,6 +36,14 @@ char data[100];
 
 const int rs = 13, en = 12, d4 = 11, d5 = 7, d6 = 9, d7 = 8;
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
+
+
+// void semaphore_init(){
+//   auto_temp_mutex = xSemaphoreCreateMutex();
+//   auto_light_mutex = xSemaphoreCreateMutex();
+//   temp_value_mutex = xSemaphoreCreateMutex();
+//   light_value_mutex = xSemaphoreCreateMutex();
+// }
 
 
 void LCD_init() {
@@ -69,7 +77,7 @@ void read_temperature_task(void* params) {
 
 void cooler_speed_task(void* params) {
   for (;;){
-    xSemaphoreTake(auto_temp_mutex, portMAX_DELAY);
+    // xSemaphoreTake(auto_temp_mutex, portMAX_DELAY);
       if (cooler_auto){
         if (new_temperature <= OFF_TEMPERATURE){
           cooler_speed = 0;
@@ -91,11 +99,11 @@ void cooler_speed_task(void* params) {
         }
       } 
       else{
-        xSemaphoreTake(temp_value_mutex, portMAX_DELAY);
+       // xSemaphoreTake(temp_value_mutex, portMAX_DELAY);
           cooler_speed = cooler_speed_manual;
-        xSemaphoreGive(temp_value_mutex);
+        // xSemaphoreGive(temp_value_mutex);
       }
-    xSemaphoreGive(auto_temp_mutex);
+    // xSemaphoreGive(auto_temp_mutex);
 
     cooler_speed = map(cooler_speed, 0, 100, 0, 255);
     analogWrite(COOLER_PORT, cooler_speed);
@@ -123,7 +131,7 @@ void read_brightness_task(void* params) {
 
 void LED_brightness_task(void* params){
   for (;;){
-    xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
+    // xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
       if (light_auto){
         if (new_brightness < 25){
           led_brightness = 100;
@@ -139,11 +147,11 @@ void LED_brightness_task(void* params){
         }
       } 
       else{
-        xSemaphoreTake(light_value_mutex, portMAX_DELAY);
+        // xSemaphoreTake(light_value_mutex, portMAX_DELAY);
           led_brightness = led_brightness_manual;
-        xSemaphoreGive(light_value_mutex);
+        // xSemaphoreGive(light_value_mutex);
       }
-    xSemaphoreGive(auto_light_mutex);
+    // xSemaphoreGive(auto_light_mutex);
 
     led_brightness = map(led_brightness,0,100,0,255);
     analogWrite(LED_PORT, led_brightness);
@@ -165,24 +173,24 @@ void set_auto_manual(void* params){
       int dS2 = digitalRead(DIP_SW_2); // cooler
 
       if (dS1){
-        xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
+        // xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
           light_auto = false;
-        xSemaphoreGive(auto_light_mutex);
+        // xSemaphoreGive(auto_light_mutex);
       } 
       else {
-        xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
+        // xSemaphoreTake(auto_light_mutex, portMAX_DELAY);
           light_auto = true;
-        xSemaphoreGive(auto_light_mutex)
+        // xSemaphoreGive(auto_light_mutex);
       }
       if (dS2){
-        xSemaphoreTake(auto_temp_mutex, portMAX_DELAY);
+        // xSemaphoreTake(auto_temp_mutex, portMAX_DELAY);
           cooler_auto = false;
-        xSemaphoreGive(auto_temp_mutex);
+        // xSemaphoreGive(auto_temp_mutex);
       } 
       else {
-        xSemaphoreTake(auto_temp_mutex, portMAX_DELAY);
+        // xSemaphoreTake(auto_temp_mutex, portMAX_DELAY);
           cooler_auto = true;
-        xSemaphoreGive(auto_temp_mutex);
+        // xSemaphoreGive(auto_temp_mutex);
       }
 
       vTaskDelay(TOTAL_DELAY / portTICK_PERIOD_MS);
@@ -225,6 +233,7 @@ void recieve_manual_value(void* params){
 void setup() {
   Serial.begin(9600);
 
+  // semaphore_init();
   LCD_init();
   read_temperature_init();
   read_brightness_init();
@@ -236,7 +245,7 @@ void setup() {
   xTaskCreate(read_brightness_task, "Read Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LED_brightness_task, "LED Brightness Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   xTaskCreate(LCD_showInfo, "Show Info LCD Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
-  // xTaskCreate(set_auto_manual, "Set auto or manual Task", 128, NULL, tskIDLE_PRIORITY + 4, NULL);
+  // xTaskCreate(set_auto_manual, "Set auto or manual Task", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   // xTaskCreate(send_status_to_GUI, "Send temperature and brightness to GUI", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
   // xTaskCreate(recieve_manual_value, "Recieve temp and light from user", 128, NULL, tskIDLE_PRIORITY + 3, NULL);
 
